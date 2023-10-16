@@ -1,5 +1,4 @@
 import pymssql
-import keyboard
 import random
 import string
 import os
@@ -24,11 +23,13 @@ class Transaction:
             password=self.password, 
             autocommit=True
         )
+        
+        self.cursor = self.conn.cursor()
         self.setup_table()
 
     def setup_table(self):
-        cursor = self.conn.cursor()
-        cursor.execute("""
+        print("Creating Table")
+        self.cursor.execute("""
             IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Transactions')
             BEGIN
                 CREATE TABLE Transactions
@@ -39,7 +40,6 @@ class Transaction:
                 );
             END
         """)
-        cursor.close()
 
     @staticmethod
     def random_string(length=10):
@@ -48,42 +48,32 @@ class Transaction:
 
     def perform_transaction(self):
         """Perform a random transaction on the database."""
-        cursor = self.conn.cursor()
 
-        try:
-            # Generate random data
-            description = self.random_string()
-            amount = round(random.uniform(1, 1000), 2)  # random float between 1 and 1000
+        # Generate random data
+        description = self.random_string()
+        amount = round(random.uniform(1, 1000), 2)  # random float between 1 and 1000
 
-            # Insert transaction
-            print(f"Inserting: {description}, ${amount}")
-            cursor.execute("INSERT INTO Transactions (Description, Amount) VALUES (%s, %s)", (description, amount))
+        # Insert transaction
+        print(f'Inserting: {description}, {amount}')
+        self.cursor.execute("INSERT INTO Transactions (Description, Amount) VALUES (%s, %s)", (description, amount))
 
-        except pymssql.Error as e:
-            print(f"Error encountered: {e}")
-            self.conn.rollback()
-
-        finally:
-            cursor.close()
+    def close(self):
+        self.cursor.close()        
+        self.conn.close()  # Close the connection when done
 
     def run(self):
-        print("Press 'a' to generate a random transaction. Press 'a' 10 times to exit.")
 
         press_count = 0
 
         while True:
-            if keyboard.is_pressed('a'):
-                self.perform_transaction()
-                press_count += 1
-                
-                if press_count >= 10:
-                    print("Pressed 'a' 10 times. Exiting...")
-                    break
-
-                while keyboard.is_pressed('a'):  # Prevent rapid firing by holding 'a'
-                    pass
-
-        self.conn.close()  # Close the connection when done
+           # input(f"Enter to send transaction {press_count}")
+            self.perform_transaction()
+            press_count += 1
+            
+            if press_count >= 3:
+                print("Pressed 'a' 10 times. Exiting...")
+                break
+        self.close()
 
 if __name__ == "__main__":
     transaction = Transaction()

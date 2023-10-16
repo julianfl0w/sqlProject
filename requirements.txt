@@ -1,0 +1,3 @@
+pymssql
+keyboard
+python-dotenv
