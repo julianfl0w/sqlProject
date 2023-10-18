@@ -1,3 +1,5 @@
 pymssql
 keyboard
 python-dotenv
+pymongo
+elasticsearch

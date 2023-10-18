@@ -1,2 +1,2 @@
 # sqlProject
- SQL Example to do Transactions
+A review of available SQL and NoSQL Databases
