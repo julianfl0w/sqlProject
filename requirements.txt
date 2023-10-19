@@ -3,3 +3,5 @@ keyboard
 python-dotenv
 pymongo
 elasticsearch
+seaborn
+sqlalchemy
