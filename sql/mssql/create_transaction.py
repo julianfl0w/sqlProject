@@ -2,31 +2,10 @@ import pymssql
 import random
 import string
 import os
+import sql_interface
 from dotenv import load_dotenv
 
-class Transaction:
-
-    def __init__(self):
-        # Load environment variables from .env file
-        load_dotenv()
-
-        self.MSSQL_SA_PASSWORD = os.getenv("MSSQL_SA_PASSWORD")
-        print(self.MSSQL_SA_PASSWORD)
-        self.server = "localhost"
-        self.user = "sa"
-        self.password = self.MSSQL_SA_PASSWORD
-
-        # Connect to the database with autocommit enabled
-        self.conn = pymssql.connect(
-            server=self.server, 
-            user=self.user, 
-            password=self.password, 
-            autocommit=True
-        )
-        
-        self.cursor = self.conn.cursor()
-        self.setup_table()
-
+class Transaction(sql_interface.SQLInterface):
     def setup_table(self):
         print("Creating Table")
         self.cursor.execute("""
@@ -57,22 +36,13 @@ class Transaction:
         print(f'Inserting: {description}, {amount}')
         self.cursor.execute("INSERT INTO Transactions (Description, Amount) VALUES (%s, %s)", (description, amount))
 
-    def close(self):
-        self.cursor.close()        
-        self.conn.close()  # Close the connection when done
-
     def run(self):
-
+        self.setup_table()
         press_count = 0
 
-        while True:
+        for i in range(1000):
            # input(f"Enter to send transaction {press_count}")
             self.perform_transaction()
-            press_count += 1
-            
-            if press_count >= 3:
-                print("Pressed 'a' 10 times. Exiting...")
-                break
         self.close()
 
 if __name__ == "__main__":
