@@ -52,7 +52,7 @@ class MongoManager:
 
 if __name__ == "__main__":
     mongo_manager = MongoManager()
-    
-    mongo_manager.write_data_to_db()
+    for i in range(1000):
+        mongo_manager.write_data_to_db()
     print("Data written to DB. Reading now...")
     mongo_manager.read_data_from_db()
